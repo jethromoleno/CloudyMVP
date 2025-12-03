@@ -1,0 +1,101 @@
+-- ----------------------------------------------------------------
+-- 1. CLEANUP (Reset database if running fresh)
+-- ----------------------------------------------------------------
+DROP TABLE IF EXISTS trip_fuels CASCADE;
+DROP TABLE IF EXISTS trip_events CASCADE;
+DROP TABLE IF EXISTS trips CASCADE;
+DROP TABLE IF EXISTS trucks CASCADE;
+DROP TABLE IF EXISTS locations CASCADE;
+DROP TABLE IF EXISTS customers CASCADE;
+DROP TABLE IF EXISTS employees CASCADE;
+DROP TABLE IF EXISTS system_users CASCADE;
+
+DROP TYPE IF EXISTS event_type CASCADE;
+DROP TYPE IF EXISTS load_type CASCADE;
+DROP TYPE IF EXISTS trip_status CASCADE;
+DROP TYPE IF EXISTS truck_status CASCADE;
+DROP TYPE IF EXISTS employee_role CASCADE;
+DROP TYPE IF EXISTS user_role CASCADE;
+DROP TYPE IF EXISTS app_module CASCADE;
+
+-- ----------------------------------------------------------------
+-- 2. ENUM TYPES (For data integrity)
+-- ----------------------------------------------------------------
+CREATE TYPE user_role AS ENUM ('SuperAdmin', 'User');
+CREATE TYPE app_module AS ENUM ('inventory', 'trip_scheduling', 'billing');
+CREATE TYPE employee_role AS ENUM ('Dispatcher', 'Driver', 'Helper', 'Encoder');
+CREATE TYPE truck_status AS ENUM ('Available', 'In Use', 'Maintenance');
+CREATE TYPE trip_status AS ENUM ('Scheduled', 'In Transit', 'Completed', 'Cancelled', 'Rescue', 'Backload');
+CREATE TYPE load_type AS ENUM ('Dry', 'Chilled', 'Ref', 'Combi');
+CREATE TYPE event_type AS ENUM ('Loading_Arrival', 'Loading_Start', 'Unloading_Finish');
+
+-- ----------------------------------------------------------------
+-- 3. SYSTEM USERS (Auth & Permissions)
+-- ----------------------------------------------------------------
+CREATE TABLE system_users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL, -- Storing plain text for now based on mock, but named hash for future
+    role user_role NOT NULL DEFAULT 'User',
+    permissions app_module[] DEFAULT '{}', -- PostgreSQL Array Type
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ----------------------------------------------------------------
+-- 4. MASTER DATA TABLES
+-- ----------------------------------------------------------------
+CREATE TABLE employees (
+    employee_id SERIAL PRIMARY KEY,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    role employee_role NOT NULL,
+    license_number VARCHAR(50), -- Nullable, only for drivers
+    is_active BOOLEAN DEFAULT TRUE
+);
+
+CREATE TABLE customers (
+    customer_id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    contact_name VARCHAR(200),
+    contact_phone VARCHAR(50),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE locations (
+    location_id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    address_line_1 VARCHAR(255),
+    city VARCHAR(100),
+    latitude NUMERIC(10, 6),
+    longitude NUMERIC(10, 6),
+    is_hub BOOLEAN DEFAULT FALSE
+);
+
+CREATE TABLE trucks (
+    truck_id SERIAL PRIMARY KEY,
+    license_plate VARCHAR(20) NOT NULL UNIQUE,
+    vin VARCHAR(50),
+    tonner_capacity SMALLINT NOT NULL,
+    status truck_status DEFAULT 'Available'
+);
+
+-- ----------------------------------------------------------------
+-- 5. TRANSACTIONAL TABLES (Trips)
+-- ----------------------------------------------------------------
+CREATE TABLE trips (
+    trip_id SERIAL PRIMARY KEY,
+    trip_code VARCHAR(50) NOT NULL UNIQUE,
+    customer_id INT REFERENCES customers(customer_id),
+    truck_id INT REFERENCES trucks(truck_id),
+    driver_id INT REFERENCES employees(employee_id),
+    helper1_id INT REFERENCES employees(employee_id),
+    helper2_id INT REFERENCES employees(employee_id),
+    origin_location_id INT REFERENCES locations(location_id),
+    destination_location_id INT REFERENCES locations(location_id),
+    scheduled_start_time TIMESTAMP WITH TIME ZONE NOT NULL,
+    status trip_status DEFAULT 'Scheduled',
+    load_type load_type DEFAULT 'Dry',
+    loading_ref_no VARCHAR(100),
+    net_weight NUMERIC(10, 2),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+... (75 lines left)

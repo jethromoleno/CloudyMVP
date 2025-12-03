@@ -1,0 +1,71 @@
+Hello I am a graduating computer engineering that wants to create a web app for SME in logistic trucking industry. I want to create a Fleet Management System web app with three of the following core features:
+
+
+
+1. Trip Scheduling System
+
+2. Inventory Management 
+
+3. Billing System
+
+
+
+I wanted to create a MVP (Minimum Viable Product) first including only the Trip Scheduling System. I want to include these features:
+
+
+
+1. Automated Trip Planning - Generates optimized schedules based on routes, truck capacity and driver availability.
+
+2. Live Tracking and Status Updates - Real-time visibility of delivery progress and vehicle location.
+
+3. Driver & Vehicle Assignment - When scheduling a trip, the dispatcher can select available driver and vehicle depending on their availability.
+
+4. Analytics Dashboard - Provides performance reports for trip efficiency and on-time delivery rates.
+
+
+
+I also want the web app to have these functionalities:
+
+1. I created a web app UI interface using Google AI Studio, I attached the files in this prompt to use it as your reference. Don't change the styling and interface that I made, I just want to add functionalities and integrate it with backend and database.
+
+2. I want the web app UI to be accessed online, meaning the web app and its database is deployed in the cloud. 
+
+3. I also included a postgresql database query and attached it into this prompt as you reference. Can you use this query to build the database for this web app?
+
+4. Make this MVP scalable in the future so that other systems and features can be added easily.
+
+
+Here is a quick flowchart of the web app:
+
+1. User logs into the login window. There are two main roles: SuperAdmin and User.
+	a. SuperAdmin has permissions to all of the features in the hub and has access to user management.
+	b. User also has limited permissions to the features in the hub. It can only access the AppModules given by the SuperAdmin in the access permissions
+
+2. The hub contains the AppModules which are accessed only by the SuperAdmin. Other User Roles jump straight to the main UI interface which contains sidebar, appnavbar and etc.
+
+3. In the main UI, it consists of the following:
+	a. AppNavBar at the top to navigate to other AppModules that can only be accessed depending on the access permissions by the SuperAdmin.
+	b. Sidebar which contains the following:
+		i. Dashboard - part of MenuItems in the sidebar which contains the real-time performance metrics of the trip schedule. It displays the total fuel costs, active trips, scheduled trips and maintenance trucks, it also consists of a line graph related to the trips.
+		ii. Trip Management - advanced features for trip planning and execution. This part will be added in the future.
+		iii. Trip Schedule - manage dispatching and trip schedule. A new trip modal will pop up if the user wants to add new trip advice.
+		iv. Truck Management - manage fleet inventory and vehicle status. A modal called add vehicle will popup if the user wants to add new truck.
+		v. Employee Directory - manages personnel, drivers, helpers and other employees.
+		vi. Settings - has user management for SuperAdmin role where he/she gives permissions to the accessed App for each of the employees. the appearance theme of the app is also available to enable light or dark mode. 
+		vii. Logout - logs out the user.
+
+
+Also, I wanted to use these following tech stack for the web app:
+
+1. For frontend, I want to use React.js
+
+2. For backend, I want to use Django and RestAPI
+
+3. For the database, I want to use PostgresQL
+
+
+I add the files I created using Google AI Studio which are codes for UI interfaces. Also I created a database schema for PostgreSQL in the Database.txt file.
+
+
+Can you help me create a prompt for my coding assistant to help build the code for the MVP? Give me a quick summary first of what you understand before you give me a prompt for my coding assistant. Wait for my Go signal before you give me a prompt.
+
