@@ -1,0 +1,49 @@
+version: '3.8' # You can ignore the obsolete version warning
+
+services:
+  # --- Backend Service (Django) ---
+  backend:
+    build: # <--- THIS BLOCK IS CRITICAL
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: fms_backend
+    # We are setting the command to only run the server for continuous running
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./backend:/app # This maps your local /backend to /app inside container
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - redis
+
+  # --- Frontend Service (React Dev Server) ---
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #   container_name: fms_frontend
+  #   # Use a volume for hot reloading during development
+  #   volumes:
+  #     - ./frontend:/app
+  #     - /app/node_modules # Exclude node_modules from being overwritten
+  #   # The React development server command
+  #   command: npm start
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     - NODE_ENV=development
+  #     - REACT_APP_API_URL=http://localhost:8000/api/
+
+  # --- Caching/Broker Service (Redis for Channels) ---
+  redis:
+    image: redis:7-alpine
+    container_name: fms_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  redis_data:

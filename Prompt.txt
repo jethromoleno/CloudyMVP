@@ -64,7 +64,7 @@ Also, I wanted to use these following tech stack for the web app:
 3. For the database, I want to use PostgresQL
 
 
-I add the files I created using Google AI Studio which are codes for UI interfaces. Also I created a database schema for PostgreSQL in the Database.txt file.
+I add the files in the GitHub which I created using Google AI Studio which are codes for UI interfaces. Here is the GitHub link for your reference: https://github.com/jethromoleno/CloudyMVP . Also I created a database schema for PostgreSQL in the Database.txt file.
 
 
 Can you help me create a prompt for my coding assistant to help build the code for the MVP? Give me a quick summary first of what you understand before you give me a prompt for my coding assistant. Wait for my Go signal before you give me a prompt.
