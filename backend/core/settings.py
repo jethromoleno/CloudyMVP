@@ -9,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # --- Initialize environment variables ---
 env = environ.Env(
     # set casting and default values
-    DEBUG=(bool, False),
+    DEBUG=(bool, True),
     # Use 0 for default Redis port
     REDIS_PORT=(int, 6379) 
 )
@@ -27,27 +27,31 @@ AUTH_USER_MODEL = 'accounts.User'
 
 # Application definition
 INSTALLED_APPS = [
-    # Django Core
+    # 1. CUSTOM USER APP MUST BE FIRST!
+    'accounts.apps.AccountsConfig', 
+
+    # 2. DJANGO CORE APPS
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
-    # Third-Party Apps
+    
+# 3. LOCAL APPS (Ordered by dependency: Master Data before Transactional)
+    'customers.apps.CustomersConfig', # Master Data
+    'locations.apps.LocationsConfig',   # Master Data
+    'trucks.apps.TrucksConfig',       # Master Data
+    'employees.apps.EmployeesConfig',   # Master Data
+    'trips.apps.TripsConfig',         # Transactional (depends on above)
+    'analytics.apps.AnalyticsConfig', # Utility/Reporting
+    
+    # 4. THIRD-PARTY APPS
     'rest_framework',
-    'rest_framework_simplejwt', # For JWT Authentication [cite: 15]
-    'channels',                 # For Real-time updates [cite: 20]
-    'corsheaders',              # Required for React Frontend communication
-
-    # [cite_start]Local Apps (as per project plan) [cite: 30]
-    'accounts.apps.AccountsConfig',
-    'trips.apps.TripsConfig',
-    'fleet.apps.FleetConfig',
-    'employees.apps.EmployeesConfig',
-    'analytics.apps.AnalyticsConfig'
-]  
+    'rest_framework_simplejwt',
+    'channels',
+    'corsheaders'
+]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -113,9 +117,21 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
+# Define the directory where static files will be collected for deployment/serving.
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Static files (CSS, JavaScript, Images)
-STATIC_URL = 'static/'
+STATIC_URL = '/static/' # Correct URL prefix
+
+STATICFILES_DIRS = [
+    # This points to your custom SOURCE files (create this folder locally!)
+    os.path.join(BASE_DIR, 'static'), 
+]
+
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder', 
+]
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
