@@ -1,4 +1,7 @@
+# trucks/models.py (UPDATED CODE)
+
 from django.db import models
+from accounts.models import FMSUser # 👈 NEW: Import the custom user model
 
 # Matches truck_status ENUM in Database.txt
 class TruckStatus(models.TextChoices):
@@ -26,6 +29,16 @@ class Truck(models.Model):
         default=TruckStatus.AVAILABLE
     )
 
+    # 🚨 CRITICAL ADDITION: Foreign key to the FMSUser model (Driver)
+    assigned_driver = models.ForeignKey(
+        FMSUser, 
+        on_delete=models.SET_NULL, # If the driver is deleted, unassign the truck (set to NULL)
+        related_name='trucks',     # Allows access via driver.trucks.all()
+        null=True,                 # Allows trucks to be unassigned
+        blank=True,
+        verbose_name='Assigned Driver'
+    )
+    
     class Meta:
         # CRUCIAL: Maps model to the 'trucks' table name
         db_table = 'trucks'

@@ -1,4 +1,8 @@
+# backend/analytics/urls.py
+
 from django.urls import path
+from .views import DashboardAnalyticsView
 
-
-urlpatterns = []
+urlpatterns = [
+    path('dashboard/', DashboardAnalyticsView.as_view(), name='analytics-dashboard'),
+]
