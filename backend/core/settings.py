@@ -22,8 +22,8 @@ SECRET_KEY = env('SECRET_KEY')
 DEBUG = env('DEBUG')
 ALLOWED_HOSTS = env.list('DJANGO_ALLOWED_HOSTS', default=['127.0.0.1', 'localhost'])
 
-# Use the custom User model
-AUTH_USER_MODEL = 'accounts.User'
+# 🔑 Phase 2: Custom User Model Setting
+AUTH_USER_MODEL = 'accounts.FMSUser'
 
 # Application definition
 INSTALLED_APPS = [
@@ -156,31 +156,27 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
 ]
 
-# --- Django REST Framework (DRF) Setup ---
+# --- Django REST Framework Settings ---
+# Set JWT as the default authentication class
 REST_FRAMEWORK = {
-    # [cite_start]Use JWT for authentication by default [cite: 15]
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
-    # Default is to require authentication
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
-    ),
-    # [cite_start]Paginate list views [cite: 32]
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10 
+    # We will add permission settings later
 }
 
-# [cite_start]--- JWT Configuration (simplejwt) [cite: 15, 95] ---
+# --- djangorestframework-simplejwt Settings ---
+from datetime import timedelta
+
 SIMPLE_JWT = {
-    # Set reasonable token lifetimes
-    "ACCESS_TOKEN_LIFETIME": timedelta(hours=1),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    # 5 minutes is standard for access tokens
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
+    # 1 day is common for refresh tokens
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     
-    # Use cookies for secure storage (best practice, but requires frontend setup)
-    # The default is header-based, which is easier for initial setup.
-    # "AUTH_COOKIE": 'access_token',
-    # "AUTH_COOKIE_SECURE": True,
-    # "AUTH_COOKIE_HTTP_ONLY": True,
-    # "AUTH_COOKIE_SAMESITE": 'Lax',
+    # We want to rotate refresh tokens for better security
+    "ROTATE_REFRESH_TOKENS": True,
+    
+    # Standard algorithm
+    "ALGORITHM": "HS256",
 }
