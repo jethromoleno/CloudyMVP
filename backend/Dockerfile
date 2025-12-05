@@ -19,6 +19,11 @@ RUN apt-get update && apt-get install -y \
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
+# Install necessary packages (curl for testing/debugging)
+RUN apt-get update && \
+    apt-get install -y curl && \
+    rm -rf /var/lib/apt/lists/*
+
 # Copy the rest of the application code
 COPY . /app/
 

@@ -20,15 +20,20 @@ environ.Env.read_env(os.path.join(BASE_DIR.parent, '.env'))
 # --- Core Settings ---
 SECRET_KEY = env('SECRET_KEY')
 DEBUG = env('DEBUG')
-ALLOWED_HOSTS = env.list('DJANGO_ALLOWED_HOSTS', default=['127.0.0.1', 'localhost'])
+ALLOWED_HOSTS = env.list('DJANGO_ALLOWED_HOSTS', default=['127.0.0.1', 'localhost', 'backend', 'testserver'])
 
 # 🔑 Phase 2: Custom User Model Setting
 AUTH_USER_MODEL = 'accounts.FMSUser'
 
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    # Add other backends here if you have them (e.g., for social login)
+]
+
 # Application definition
 INSTALLED_APPS = [
     # 1. CUSTOM USER APP MUST BE FIRST!
-    'accounts.apps.AccountsConfig', 
+    'accounts.apps.AccountsConfig',
 
     # 2. DJANGO CORE APPS
     'django.contrib.admin',
@@ -82,7 +87,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'core.wsgi.application'
+ASGI_APPLICATION = 'core.asgi.application'
 
 # --- Database Configuration ---
 # [cite_start]Uses DATABASE_URL from .env file for Supabase/PostgreSQL [cite: 21]
@@ -179,4 +184,16 @@ SIMPLE_JWT = {
     
     # Standard algorithm
     "ALGORITHM": "HS256",
+}
+
+# settings.py
+# Configuration for Django Channels to use Redis
+CHANNEL_LAYERS = {
+    'default': {
+        # FIX: The definitive path for the Redis backend class
+        'BACKEND': 'channels_redis.core.RedisChannelLayer', 
+        'CONFIG': {
+            "hosts": [('fms_redis', 6379)], 
+        },
+    },
 }
