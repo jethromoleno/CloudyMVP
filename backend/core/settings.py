@@ -22,8 +22,8 @@ SECRET_KEY = env('SECRET_KEY')
 DEBUG = env('DEBUG')
 ALLOWED_HOSTS = env.list('DJANGO_ALLOWED_HOSTS', default=['127.0.0.1', 'localhost'])
 
-# Use the custom User model
-AUTH_USER_MODEL = 'accounts.User'
+# 🔑 Phase 2: Custom User Model Setting
+AUTH_USER_MODEL = 'accounts.FMSUser'
 
 # Application definition
 INSTALLED_APPS = [

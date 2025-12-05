@@ -1,84 +1,36 @@
+# accounts/models.py
+
+from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.contrib.auth.models import (
-    AbstractBaseUser, BaseUserManager, PermissionsMixin
-)
-from django.contrib.postgres.fields import ArrayField
-from django.utils import timezone
+from django.utils import timezone # 👈 Needed for the created_at field
 
-# 1. Define ENUM Choices to match PostgreSQL types (user_role and app_module) 
-class UserRole(models.TextChoices):
-    SUPER_ADMIN = 'SuperAdmin', 'SuperAdmin'
-    ADMIN = 'Admin', 'Admin'
-    USER = 'User', 'User'
 
-class AppModule(models.TextChoices):
-    INVENTORY = 'inventory', 'inventory'
-    TRIP_SCHEDULING = 'trip_scheduling', 'trip_scheduling'
-    BILLING = 'billing', 'billing'
-
-# 2. Custom User Manager (Required for AbstractBaseUser)
-class UserManager(BaseUserManager):
-    def create_user(self, username, password=None, **extra_fields):
-        if not username:
-            raise ValueError('The Username field must be set')
-        user = self.model(username=username, **extra_fields)
-        user.set_password(password)
-        user.save(using=self._db)
-        return user
-
-    def create_superuser(self, username, password=None, **extra_fields):
-        # Set required flags for Admin integration
-        extra_fields.setdefault('is_active', True)
-        extra_fields.setdefault('is_staff', True)
-        extra_fields.setdefault('is_superuser', True)
-        extra_fields.setdefault('role', UserRole.SUPER_ADMIN)
-        
-        # Default permissions for SuperAdmin based on SQL seed data [cite: 22]
-        default_permissions = [
-            AppModule.INVENTORY, 
-            AppModule.TRIP_SCHEDULING, 
-            AppModule.BILLING
-        ]
-        extra_fields.setdefault('permissions', default_permissions)
-        
-        return self.create_user(username, password, **extra_fields)
-
-# 3. Custom User Model
-class User(AbstractBaseUser, PermissionsMixin):
-    # username VARCHAR(50) NOT NULL UNIQUE
-    username = models.CharField(max_length=50, unique=True)
+class FMSUser(AbstractUser):
+    """
+    Custom User Model based on AbstractUser to retain built-in Django Groups/Permissions.
+    - Uses email for login (USERNAME_FIELD).
+    - Maps to the required 'system_users' database table.
+    """
     
-    # role user_role NOT NULL DEFAULT 'User' [cite: 7, 11]
-    role = models.CharField(
-        max_length=50,
-        choices=UserRole.choices,
-        default=UserRole.USER,
-        null=False
-    )
-    
-    # permissions app_module[] DEFAULT '{}' [cite: 8, 11]
-    # NOTE: Uses Django's ArrayField to map to the PostgreSQL array type. 
-    # Requires 'django.contrib.postgres' in INSTALLED_APPS.
-    permissions = ArrayField(
-        models.CharField(max_length=50, choices=AppModule.choices),
-        default=list,
-        blank=True
-    )
-    
-    # created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP 
+    # 1. OVERRIDE EMAIL FIELD
+    # Ensure email is unique and used for login
+    email = models.EmailField(unique=True) 
+
+    # 2. ADD CUSTOM FIELD
+    # Add the required created_at timestamp field
     created_at = models.DateTimeField(default=timezone.now, editable=False)
-    
-    # Required Django/Admin Fields 
-    is_active = models.BooleanField(default=True)
-    is_staff = models.BooleanField(default=False)
-    
-    objects = UserManager()
 
-    USERNAME_FIELD = 'username'
-    REQUIRED_FIELDS = ['role'] 
+    # 3. CONFIGURE AUTH FIELDS
+    # Set email as the primary login field
+    USERNAME_FIELD = 'email'
+    # These fields are prompted when creating a user via createsuperuser
+    REQUIRED_FIELDS = ['username'] 
+
+    def __str__(self):
+        return self.email
 
     class Meta:
-        # CRUCIAL FIX: Sets the table name to match the SQL script 
+        # CRUCIAL: Maps the model to the required 'system_users' database table
         db_table = 'system_users'
         verbose_name = 'System User'
         verbose_name_plural = 'System Users'
